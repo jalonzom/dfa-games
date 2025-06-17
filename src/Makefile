@@ -1,11 +1,13 @@
 # Makefile
 
-CXX=g++
-
-CXXFLAGS_SHARED=-Wall -Warith-conversion -Wconversion -Wextra -Werror -Wno-c++11-extensions --pedantic -std=c++20 -g
+CXX=g++-15
+# removing -Warith-conversion because its giving me an error in terminal
+# ask prof considine about this because it keeps giving errors everytime i 
+# try to make the file and run it
+CXXFLAGS_SHARED=-Wall -Wextra -Werror -Wno-c++11-extensions --pedantic -std=c++20 -g
 LDFLAGS_SHARED=-L/usr/local/opt/openssl/lib -lcrypto
 
-ifeq ($(CXX), g++)
+ifeq ($(CXX), g++-15)
 # enable parallel execution when using g++ since available in libstdc++
 CXXFLAGS=$(CXXFLAGS_SHARED) -I/usr/local/include -Wno-sign-compare
 LDFLAGS=$(LDFLAGS_SHARED) -L/usr/local/lib -ltbb
@@ -169,8 +171,8 @@ validate_forward_backward : validate_forward_backward.o test_utils.o validate_ut
 
 validate_terminal : validate_terminal.o test_utils.o validate_utils.o dfagames.a
 	$(CXX) -o $@ $^ $(LDFLAGS)
-
-dfagames.a : AcceptDFA.o AmazonsGame.o BetweenMasks.o BinaryDFA.o BinaryFunction.o BinaryRestartDFA.o Board.o BreakthroughGame.o ChangeDFA.o ChessGame.o CompactBitSet.o CountCharacterDFA.o CountDFA.o CountManager.o DFA.o DFAUtil.o DNFBuilder.o DedupedDFA.o DifferenceDFA.o DifferenceRestartDFA.o FixedDFA.o Flashsort.o FlexBitSet.o Game.o GameUtil.o IntersectionDFA.o InverseDFA.o MemoryMap.o MoveGraph.o MoveSet.o NormalNimGame.o NormalPlayGame.o OrderedBitSet.o OthelloGame.o Profile.o RejectDFA.o StringDFA.o TicTacToeGame.o UnionDFA.o UnionRestartDFA.o UnorderedBitSet.o VectorBitSet.o utils.o
+# added ataxx object file
+dfagames.a : AcceptDFA.o AmazonsGame.o AtaxxGame.o BetweenMasks.o BinaryDFA.o BinaryFunction.o BinaryRestartDFA.o Board.o BreakthroughGame.o ChangeDFA.o ChessGame.o CompactBitSet.o CountCharacterDFA.o CountDFA.o CountManager.o DFA.o DFAUtil.o DNFBuilder.o DedupedDFA.o DifferenceDFA.o DifferenceRestartDFA.o FixedDFA.o Flashsort.o FlexBitSet.o Game.o GameUtil.o IntersectionDFA.o InverseDFA.o MemoryMap.o MoveGraph.o MoveSet.o NormalNimGame.o NormalPlayGame.o OrderedBitSet.o OthelloGame.o Profile.o RejectDFA.o StringDFA.o TicTacToeGame.o UnionDFA.o UnionRestartDFA.o UnorderedBitSet.o VectorBitSet.o utils.o
 	$(AR) rcs $@ $^
 
 ############################################################

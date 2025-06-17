@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "AmazonsGame.h"
+#include "AtaxxGame.h"
 #include "BreakthroughGame.h"
 #include "ChessGame.h"
 #include "DFAUtil.h"
@@ -57,6 +58,16 @@ Game *get_game(std::string game_name)
 	  throw std::logic_error("get_name() failed parsing amazons game name");
 	}
       output = new AmazonsGame(width, height);
+    }
+  else if(game_name.starts_with("ataxx_"))
+    {
+      int width = 0;
+      int height = 0;
+      if(std::sscanf(game_name.c_str(), "ataxx_%dx%d", &width, &height) != 2)
+	{
+	  throw std::logic_error("get_name() failed parsing ataxx game name");
+	}
+      output = new AtaxxGame(width, height);
     }
   else if(game_name.starts_with("breakthrough_"))
     {
@@ -194,7 +205,7 @@ void test_forward(const Game& game_in, const std::vector<size_t>& positions_expe
       current_positions = game_in.get_moves_forward(side_to_move, current_positions);
       std::cout << log_prefix << "depth " << (depth + 1) << ": " << current_positions->states() << " states, " << current_positions->size() << " positions" << std::endl;
 
-      assert(size_t(current_positions->size()) == positions_expected.at(depth + 1));
+      assert(size_t(current_positions->size()) == positions_expected.at(size_t(depth) + 1));
     }
 }
 
