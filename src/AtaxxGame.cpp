@@ -30,13 +30,16 @@ AtaxxGame::AtaxxGame(int width_in, int height_in)
 {}
 
 
-
+// something has to be wrong with the build_move_graph
+// best step now is to go through it function by function and see what exactly might be causing 
+// an issue
 MoveGraph AtaxxGame::build_move_graph(int side_to_move) const {
   MoveGraph move_graph(get_shape());
 
   move_graph.add_node("begin");
   move_graph.add_node("begin+1");
   move_graph.add_edge("begin legal", "begin", "begin+1", get_positions_legal());
+  // move_graph.add_edge("begin legal", "begin", "begin+1", DFAUtil::get_accept(get_shape()));
 
   std::vector<std::string> move_names;
 
@@ -100,6 +103,7 @@ MoveGraph AtaxxGame::build_move_graph(int side_to_move) const {
           move_graph.add_node(move_name, changes, pre_conditions, post_conditions);
 
 
+
           move_graph.add_edge("begin+1", move_name);
           move_names.push_back(move_name);
         }
@@ -115,6 +119,7 @@ MoveGraph AtaxxGame::build_move_graph(int side_to_move) const {
 
   move_graph.add_node("end");
   move_graph.add_edge("end legal", "end+1", "end", get_positions_legal());
+  // move_graph.add_edge("end legal", "end+1", "end", DFAUtil::get_accept(get_shape()));
 
   // pass edge if we have no moves but opponent does (taken from othello code)
   shared_dfa_ptr pass_condition = DFAUtil::get_difference(
@@ -171,22 +176,33 @@ shared_dfa_ptr AtaxxGame::get_positions_can_place(int side_to_move) const {
   });
 }
 // returns all valid board setups
+// does this make all states without a piece in the 4 corners invalid?
+// ask about this logic because the constraints may be too much here with 
+// requiring all four corners to be ocupied with a piece
+
 shared_dfa_ptr AtaxxGame::get_positions_legal() const {
   return load_or_build("legal", [&]() {
     // corners
-    std::vector<int> required_positions = {
-      CALCULATE_LAYER(0, 0),
-      CALCULATE_LAYER(width - 1, height - 1),
-      CALCULATE_LAYER(0, height - 1),
-      CALCULATE_LAYER(width - 1, 0)
-    };
+    //std::vector<int> required_positions = {
+    //  CALCULATE_LAYER(0, 0),
+    //  CALCULATE_LAYER(width - 1, height - 1),
+    //  CALCULATE_LAYER(0, height - 1),
+    //  CALCULATE_LAYER(width - 1, 0)
+    //};
 
-    std::vector<shared_dfa_ptr> constraints;
-    for (int pos : required_positions) {
-      constraints.push_back(DFAUtil::get_inverse(DFAUtil::get_fixed(get_shape(), pos, 0)));
-    }
+    //std::vector<shared_dfa_ptr> constraints;
+    //for (int pos : required_positions) {
+    //  constraints.push_back(DFAUtil::get_inverse(DFAUtil::get_fixed(get_shape(), pos, 0)));
+    //}
 
-    return DFAUtil::get_intersection_vector(get_shape(), constraints);
+    //return DFAUtil::get_intersection_vector(get_shape(), constraints);
+
+    // instead of constraining corners or pieces, constrain # of pieces 
+    // since each player needs at min 1 piece to be playing
+    shared_dfa_ptr has_black = DFAUtil::get_count_character(get_shape(), 1, 1);
+    shared_dfa_ptr has_white = DFAUtil::get_count_character(get_shape(), 2, 1);
+
+    return DFAUtil::get_intersection_vector(get_shape(), {has_black, has_white});
   });
 }
 
