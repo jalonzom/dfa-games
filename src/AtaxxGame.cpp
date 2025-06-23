@@ -323,7 +323,7 @@ shared_dfa_ptr AtaxxGame::get_positions_end() const
     shared_dfa_ptr white_dead = DFAUtil::get_count_character(get_shape(), 2, 0);
     return DFAUtil::get_union_vector(get_shape(), {no_blanks, black_dead, white_dead}); });
 }
-
+#if 0
 shared_dfa_ptr AtaxxGame::build_positions_won(int side) const
 {
   return load_or_build("won_" + std::to_string(side), [&]()
@@ -335,8 +335,28 @@ shared_dfa_ptr AtaxxGame::build_positions_won(int side) const
 
     return DFAUtil::get_intersection(end, DFAUtil::get_intersection(mine, opp)); });
 }
+#endif
+
+shared_dfa_ptr AtaxxGame::build_positions_won(int side) const
+{
+  int opp = 1 - side;
+  shared_dfa_ptr end_positions = get_positions_end();
+
+  std::vector<shared_dfa_ptr> winning_cases;
+  for (int my_count = 1; my_count <= width * height; ++my_count)
+  {
+    shared_dfa_ptr mine = DFAUtil::get_count_character(get_shape(), 1 + side, my_count);
+    shared_dfa_ptr opp_constraint = DFAUtil::get_count_character(get_shape(), 1 + opp, 0, my_count - 1);
+    winning_cases.push_back(DFAUtil::get_intersection(mine, opp_constraint));
+  }
+
+  shared_dfa_ptr win_positions = DFAUtil::get_union_vector(get_shape(), winning_cases);
+  return DFAUtil::get_intersection(end_positions, win_positions);
+}
+
 // games won - games lost
 shared_dfa_ptr AtaxxGame::build_positions_lost(int side_to_move) const
 {
-  return build_positions_won(1 - side_to_move);
+  
+  return get_positions_won(1 - side_to_move);
 }
