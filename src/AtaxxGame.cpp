@@ -185,10 +185,22 @@ MoveGraph AtaxxGame::build_move_graph(int side_to_move) const
   // move_graph.add_edge("end legal", "end+1", "end", DFAUtil::get_accept(get_shape()));
 
   // pass edge if we have no moves but opponent does (taken from othello code)
+  #if 0
   shared_dfa_ptr pass_condition = DFAUtil::get_difference(
       get_positions_can_place(1 - side_to_move),
       get_positions_can_place(side_to_move));
 
+  move_graph.add_edge("pass", "begin+1", "end+1", pass_condition);
+  #endif
+  
+  // at least 1 piece
+  shared_dfa_ptr has_piece = DFAUtil::get_count_character(get_shape(), 1 + side_to_move, 1, width * height); 
+  // cannot move
+  shared_dfa_ptr cannot_move = DFAUtil::get_inverse(get_positions_can_place(side_to_move)); 
+  // opp can move               
+  shared_dfa_ptr opp_can_move = get_positions_can_place(1 - side_to_move);                                 
+
+  shared_dfa_ptr pass_condition = DFAUtil::get_intersection_vector(get_shape(), {has_piece, cannot_move, opp_can_move});
   move_graph.add_edge("pass", "begin+1", "end+1", pass_condition);
 
   return move_graph;
