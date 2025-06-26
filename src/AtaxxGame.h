@@ -32,6 +32,9 @@ public:
   virtual shared_dfa_ptr build_positions_won(int) const;
   virtual DFAString get_position_initial() const;
   virtual std::string position_to_string(const DFAString&) const;
+// validation
+  virtual std::vector<DFAString> validate_moves(int, DFAString) const;
+  virtual int validate_result(int, DFAString) const;
 };
 
 

@@ -372,3 +372,84 @@ shared_dfa_ptr AtaxxGame::build_positions_lost(int side_to_move) const
   
   return get_positions_won(1 - side_to_move);
 }
+// return all valid dfa string board states reachable from input position for that side
+std::vector<DFAString> AtaxxGame::validate_moves(int side_to_move, DFAString position) const 
+{
+  // empty list to fill w/ valid board states 
+  std::vector<DFAString> output;
+  // iterate through every square on board
+  for (int x_src = 0; x_src < width; ++x_src) {
+    for (int y_src = 0; y_src < height; ++y_src) {
+      
+      int src_layer = CALCULATE_LAYER(x_src, y_src);
+      // if square does not have player piece, skip aka only checks players pieces
+      if (position[src_layer] != 1 + side_to_move) continue;
+      // now check all directions within 2 jump from source
+      for (int dx = -2; dx <= 2; ++dx) {
+        for (int dy = -2; dy <= 2; ++dy) {
+          if (dx == 0 && dy == 0) continue;
+
+          // make sure it's on board within limits
+          int x_dst = x_src + dx;
+          int y_dst = y_src + dy;
+          if (x_dst < 0 || x_dst >= width || y_dst < 0 || y_dst >= height) continue;
+          // make sure it can only move to an empty space
+          int dst_layer = CALCULATE_LAYER(x_dst, y_dst);
+          if (position[dst_layer] != 0) continue;
+
+          std::vector<int> new_state = position.get_characters();
+          
+          
+          if (std::abs(dx) <= 1 && std::abs(dy) <= 1) {
+            // clone, keep og
+            new_state[dst_layer] = 1 + side_to_move;
+          } else {
+            // jump, delete og
+            new_state[src_layer] = 0;
+            new_state[dst_layer] = 1 + side_to_move;
+          }
+
+          // flip adjacent pieces
+          for (int fx = -1; fx <= 1; ++fx) {
+            for (int fy = -1; fy <= 1; ++fy) {
+              if (fx == 0 && fy == 0) continue;
+              int x_adj = x_dst + fx;
+              int y_adj = y_dst + fy;
+              if (x_adj < 0 || x_adj >= width || y_adj < 0 || y_adj >= height) continue;
+              int adj_layer = CALCULATE_LAYER(x_adj, y_adj);
+              if (new_state[adj_layer] == 2 - side_to_move) {
+                new_state[adj_layer] = 1 + side_to_move;
+              }
+            }
+          }
+
+          output.push_back(DFAString(get_shape(), new_state));
+        }
+      }
+    }
+  }
+
+  return output;
+
+}
+
+int AtaxxGame::validate_result(int side_to_move, DFAString position) const
+{
+  int black_count = 0;
+  int white_count = 0;
+  // count black and white pieces from board by looping through each position
+  for (int value : position.get_characters()) {
+    if (value == 1) black_count++;
+    else if (value == 2) white_count++;
+  }
+  // check if game is actually over: if black has no pieces, white has no pieces, or board full
+  if (black_count == 0 || white_count == 0 || black_count + white_count == width * height) {
+    // game over bc black won or white won
+    if (black_count > white_count) return (side_to_move == 0) ? 1 : -1;
+    if (white_count > black_count) return (side_to_move == 1) ? 1 : -1;
+    // game over bc board is full + both have same number of pieces
+    return 0; 
+  }
+  // game not over yet
+  return 0; 
+}
