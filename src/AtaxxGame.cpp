@@ -397,7 +397,11 @@ std::vector<DFAString> AtaxxGame::validate_moves(int side_to_move, DFAString pos
           int dst_layer = CALCULATE_LAYER(x_dst, y_dst);
           if (position[dst_layer] != 0) continue;
 
-          std::vector<int> new_state = position.get_characters();
+          std::vector<int> new_state(width*height);
+          for (int layer = 0; layer< height*width; ++layer){
+          new_state[layer] = position[layer];
+    
+          }
           
           
           if (std::abs(dx) <= 1 && std::abs(dy) <= 1) {
@@ -438,7 +442,8 @@ int AtaxxGame::validate_result(int side_to_move, DFAString position) const
   int black_count = 0;
   int white_count = 0;
   // count black and white pieces from board by looping through each position
-  for (int value : position.get_characters()) {
+  for (int layer = 0; layer< height*width; ++layer){
+    auto value = position[layer];
     if (value == 1) black_count++;
     else if (value == 2) white_count++;
   }
