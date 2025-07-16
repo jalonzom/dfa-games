@@ -7,5 +7,5 @@ SCRIPTFILE="typescript.ataxx_${DATE}"
 
 # script -t 0 -a $SCRIPTFILE ./build_forward ataxx_6x6 2
 
-script -t 0 -a $SCRIPTFILE ./build_backward ataxx_6x6 4
+script -t 0 -a $SCRIPTFILE ./build_backward ataxx_5x5 12
 
