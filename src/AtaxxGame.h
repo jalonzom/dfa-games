@@ -14,6 +14,8 @@ private:
 
 public:
   AtaxxGame(int, int);
+  int get_width() const { return width; }
+  int get_height() const { return height; }
 
 private:
   virtual MoveGraph build_move_graph(int) const;

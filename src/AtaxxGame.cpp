@@ -433,6 +433,37 @@ std::vector<DFAString> AtaxxGame::validate_moves(int side_to_move, DFAString pos
     }
   }
 
+  // if(output.empty()) {check for opponent moves and pass if any found}
+  if (output.empty())
+  {
+    int my_count = 0, opp_count = 0;
+    for (int layer = 0; layer < width * height; ++layer)
+    {
+      if (position[layer] == 1 + side_to_move)
+        my_count++;
+      else if (position[layer] == 2 - side_to_move)
+        opp_count++;
+    }
+
+    if (my_count < opp_count)
+    {
+      return output; // fast forward loss 
+    }
+    std::vector<DFAString> opp_moves = validate_moves(1 - side_to_move, position);
+    bool opp_can_move = false;
+    for (const auto& child : opp_moves) {
+      if (child.to_string() != position.to_string()) {
+        opp_can_move = true;
+        break;
+      }
+    }
+    if (opp_can_move) {
+      // if you have no moves, but opponent DOES return og position to indicate you passed
+      output.push_back(position);
+    }
+
+  }
+
   return output;
 
 }
