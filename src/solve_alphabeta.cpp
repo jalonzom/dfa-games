@@ -10,9 +10,9 @@
 #include <sstream>
 #include <iomanip>
 
-    std::random_device rand_dev;
-    std::mt19937 generator(rand_dev());
-    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+std::random_device rand_dev;
+std::mt19937 generator(rand_dev());
+std::uniform_real_distribution<double> dist(-1.0, 1.0);
 // random uniform num between [-1, 1], double check to see if this is how it should be done
 // lowkey just googled how to get random numbers in c++ and used one from stack overflow that seemed legit
 double random_heuristic()
@@ -27,29 +27,33 @@ static shared_dfa_ptr losing_dfas[2] = {0, 0};
 double alphabeta(const AtaxxGame &game, const DFAString &pos, int side, int depth,
                  double alpha, double beta, int &positions_evaluated, int &dfa_hits, int &heuristic_hits)
 {
-    
+
     // see if game is won or not at this point
     positions_evaluated++;
     int result = game.validate_result(side, pos);
-    if (result != 0) {
+    if (result != 0)
+    {
         // if there is a forced win, return 100 if forced loss return -100
-        return (result == 1) ? 100.0 : (result == -1) ? -100.0: 0.0;
+        return (result == 1) ? 100.0 : (result == -1) ? -100.0
+                                                      : 0.0;
     }
-    if(winning_dfas[side]->contains(pos)) {
-        //std::cout << "DFA says: WINNING\n";
+    if (winning_dfas[side]->contains(pos))
+    {
+        // std::cout << "DFA says: WINNING\n";
         dfa_hits++;
         return 100.0;
     }
-    if(losing_dfas[side]->contains(pos)) {
-        //std::cout << "DFA says: LOSING\n";
+    if (losing_dfas[side]->contains(pos))
+    {
+        // std::cout << "DFA says: LOSING\n";
         dfa_hits++;
         return -100.0;
     }
-    if (depth == 0) {
+    if (depth == 0)
+    {
         heuristic_hits++;
         return random_heuristic();
     }
-
 
     std::vector<DFAString> children = game.validate_moves(side, pos);
     if (children.size() == 1 && children[0].to_string() == pos.to_string())
@@ -65,21 +69,21 @@ double alphabeta(const AtaxxGame &game, const DFAString &pos, int side, int dept
 
         for (int i = 0; i < total_squares; ++i)
         {
-            if (after_pass[i] == my_char) my_pieces++;
+            if (after_pass[i] == my_char)
+                my_pieces++;
         }
         // ask if this is really necessary bc in validate moves if it returns a position,
         // then we know that it has to have more pieces than opponent?
-        if (my_pieces*2 < total_squares)
+        if (my_pieces * 2 < total_squares)
         {
             // automatic loss
             return -100.0;
         }
 
-
-
         // else continue without decreasing depth
         return -alphabeta(game, after_pass, 1 - side, depth, -beta, -alpha, positions_evaluated, dfa_hits, heuristic_hits);
     }
+    
     // had to google infinity too bruh
     // set best possible move to neg infinity so it'll update
     double best = -std::numeric_limits<double>::infinity();
@@ -120,7 +124,7 @@ int main(int argc, char **argv)
 
     AtaxxGame game(width, height);
 
-    for(int side = 0; side < 2; ++side)
+    for (int side = 0; side < 2; ++side)
     {
         winning_dfas[side] = game.get_positions_winning(side, db_ply);
         losing_dfas[side] = game.get_positions_losing(side, db_ply);
@@ -130,9 +134,6 @@ int main(int argc, char **argv)
     int positions_evaluated = 0;
     int dfa_hits = 0;
     int heuristic_hits = 0;
-
-    
-
 
     std::cout << "checking for P1 (black) let's hope you finally work..." << std::endl;
     std::cout << game.position_to_string(initial) << std::endl;
